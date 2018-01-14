@@ -40,6 +40,106 @@ void queue_garbageCollect(queue_t* q) {
   free(q->data);
 }
 
+//returns true if the queue is full
+bool queue_full(queue_t* q){
+   int val = q->indexIn +1;
+   if(val >= queue_size(q)){
+     val = 0;
+   }
+   //check to see if the out is equal to incremented val
+   if(val == q->indexOut){
+     return true;
+   }else{
+     return false;
+   }
+}
+
+//returns true if the queue is empty
+bool queue_empty(queue_t* q){
+  return q->indexIn == q->indexOut ? true : false;
+}
+
+//if the queue if not full, push a new element into the queue and clear the underflow flag
+void queue_push(queue_t* q, queue_data_t value){
+  //if the queue isn't full, push
+  if(!queue_full(q)){
+    //put the data in the current position and increment the indexIN
+    q->data[q->indexIn] = value;
+    q->indexIn += 1;
+    //check if the index is out of bounds
+    if(q->indexIn >= queue_size(q)){
+      q->indexIn = 0;
+    }
+    //clear the underflow flag
+    q->underflowFlag = false;
+    //increase the element count
+    q->elementCount++;
+  }else{
+    prinf("Queue is full, invalid push\n\r");
+    //set the overflow flag
+    q->overflowFlag = true;
+  }
+}
+
+//check to see if the queue is empty of not, if it is, don't pop
+queue_data_t queue_pop(queue_t* q){
+  //check if queue is empty
+  if(!queue_empty(q)){
+    queue_data_t return_element = q->data[q->indexOut];
+    //increment the indexOut
+    q->indexOut++;
+    //if the index is past the last element
+    if(q->indexOut >= queue_size(q)){
+      q->indexOut = 0;
+    }
+    //decrease the element count
+    q->elementCount--;
+  }else{
+    //underflow error
+    printf("Underflow error, empty queue\n\r");
+    q->underflowFlag = true;
+  }
+}
+
+//force push
+void queue_overwritePush(queue_t* q, queue_data_t value){
+  //check if full
+  if(queue_full(q)){
+    queue_pop(q);
+  }
+  //now push
+  queue_push(q, value);
+}
+
+//provide random access read capability
+//low valued indexes access olderqueue elements while higher value indexes access newer entries
+//print meaningful
+queue_data_t queue_readElementAt(queue_t* q, queue_index_t index){
+  //check the indexIN
+  if (index >= q->element_count){
+    printf("Error\n\r");
+  }
+  return q->data[q->indexOut + index % size);
+}
+
+//get the element count
+queue_size_t queue_elementCount(queue_t* q){
+  return q->elementCount;
+}
+
+//return true if an underflow flag has occured
+bool queue_underflow(queue_t* q){
+  return q->underflowFlag;
+}
+
+//return true if the overflow flag is set
+bool queue_overflow(queue_t* q){
+  return q->overflowFlag;
+}
+
+
+
+
 /********************************************************
 ************* Test Code starts here. ********************
 ****** invoke queue_runTest() to run test code. *********
