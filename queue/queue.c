@@ -71,11 +71,25 @@ void printQueue(queue_t* q){
   printf("]\n\r");
 }
 
+void printQ(queue_t* q){
+  int i = 0;
+  printf("[");
+  for(i = 0; i < 6; i++){
+    printf("%f ", q->data[i]);
+  }
+  printf("]\n\r");
+}
+
+
 //if the queue if not full, push a new element into the queue and clear the underflow flag
 void queue_push(queue_t* q, queue_data_t value){
   //if the queue isn't full, push
-  // printf("%f\n\r", value);
-  // printf("%f\n", q->indexIn);
+
+  // printf("%f\n", value);
+  // printf("%d\n", queue_full(q));
+  // printf("In: %d\n", q->indexIn);
+  // printf("Out: %d\n", q->indexOut);
+
   q->underflowFlag = false;
 
   if(!queue_full(q)){
@@ -98,6 +112,7 @@ void queue_push(queue_t* q, queue_data_t value){
     //set the overflow flag
     q->overflowFlag = true;
   }
+    // printQ(q);
 }
 
 //check to see if the queue is empty of not, if it is, don't pop
@@ -126,6 +141,7 @@ queue_data_t queue_pop(queue_t* q){
 void queue_overwritePush(queue_t* q, queue_data_t value){
   //check if full
   if(queue_full(q)){
+    //pop from the queue
     queue_pop(q);
   }
   //now push
@@ -142,7 +158,7 @@ queue_data_t queue_readElementAt(queue_t* q, queue_index_t index){
     printf("Error\n\r");
   }
 
-  return q->data[(q->indexOut + index) % queue_size(q)];
+  return q->data[(q->indexOut + index) % (queue_size(q) + 1)];
 }
 
 //get the element count

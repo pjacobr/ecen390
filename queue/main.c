@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "queue.h"
-#define SIZE_QUEUE 100
+#define SIZE_QUEUE 5
 
 
 
@@ -15,15 +15,17 @@ int main(){
 
   printf("%d\n", queue_size(q));
   int i = 0;
-  for(i = 0; i < 300; i++){
+  for(i = 0; i < 7; i++){
     queue_push(q, i);
   }
-  printQueue(q);
-  for(i = 0; i < 300; i++){
-    queue_push(q, i);
+  printQ(q);
+  for(i = 20; i < 26; i++){
+    queue_overwritePush(q, i);
+    printf("----\n\r");
   }
 
-  
+
+  printQueue(q);
 
   // printf("ElCOunt: %d\n\r", queue_size(q));
   // printQueue(q);
@@ -87,7 +89,7 @@ int main(){
   // printf("ElCOunt: %f\n\r", queue_readElementAt(q, 2));
   // printf("ElCOunt: %f\n\r", queue_readElementAt(q, 3));
   //
-  // queue_runTest();
+  queue_runTest();
 
   return 0;
 }
