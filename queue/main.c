@@ -18,7 +18,12 @@ int main(){
   for(i = 0; i < 300; i++){
     queue_push(q, i);
   }
-  // printQueue(q);
+  printQueue(q);
+  for(i = 0; i < 300; i++){
+    queue_push(q, i);
+  }
+
+  
 
   // printf("ElCOunt: %d\n\r", queue_size(q));
   // printQueue(q);
@@ -82,7 +87,7 @@ int main(){
   // printf("ElCOunt: %f\n\r", queue_readElementAt(q, 2));
   // printf("ElCOunt: %f\n\r", queue_readElementAt(q, 3));
   //
-  queue_runTest();
+  // queue_runTest();
 
   return 0;
 }
