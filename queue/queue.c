@@ -42,11 +42,14 @@ void queue_garbageCollect(queue_t* q) {
 
 //returns true if the queue is full
 bool queue_full(queue_t* q){
-   int val = q->indexIn +1;
-   if(val >= queue_size(q)){
+   queue_index_t val = q->indexIn + 1;
+   // printf("%d\n", val);
+   if(val > queue_size(q)){
+     // printf("Full: %d", queue_size(q));
      val = 0;
    }
    //check to see if the out is equal to incremented val
+
    if(val == q->indexOut){
      return true;
    }else{
@@ -59,15 +62,31 @@ bool queue_empty(queue_t* q){
   return q->indexIn == q->indexOut ? true : false;
 }
 
+void printQueue(queue_t* q){
+  int i = 0;
+  printf("[");
+  for(i = 0; i < queue_elementCount(q); i++){
+    printf("%f ", queue_readElementAt(q, i));
+  }
+  printf("]\n\r");
+}
+
 //if the queue if not full, push a new element into the queue and clear the underflow flag
 void queue_push(queue_t* q, queue_data_t value){
   //if the queue isn't full, push
+  // printf("%f\n\r", value);
+  // printf("%f\n", q->indexIn);
+  q->underflowFlag = false;
+
   if(!queue_full(q)){
+    // printf("EL COUTN: %d\n", q->elementCount);
     //put the data in the current position and increment the indexIN
+    // printf("val: %f\n\r", value);
     q->data[q->indexIn] = value;
+    // printf("data:%f", q->data[q->indexIn]);
     q->indexIn += 1;
     //check if the index is out of bounds
-    if(q->indexIn >= queue_size(q)){
+    if(q->indexIn > queue_size(q)){
       q->indexIn = 0;
     }
     //clear the underflow flag
@@ -75,7 +94,7 @@ void queue_push(queue_t* q, queue_data_t value){
     //increase the element count
     q->elementCount++;
   }else{
-    prinf("Queue is full, invalid push\n\r");
+    printf("Queue is full, invalid push\n\r");
     //set the overflow flag
     q->overflowFlag = true;
   }
@@ -84,16 +103,18 @@ void queue_push(queue_t* q, queue_data_t value){
 //check to see if the queue is empty of not, if it is, don't pop
 queue_data_t queue_pop(queue_t* q){
   //check if queue is empty
+  q->overflowFlag = false;
   if(!queue_empty(q)){
     queue_data_t return_element = q->data[q->indexOut];
     //increment the indexOut
-    q->indexOut++;
+    q->indexOut += 1;
     //if the index is past the last element
-    if(q->indexOut >= queue_size(q)){
+    if(q->indexOut > queue_size(q)){
       q->indexOut = 0;
     }
+    q->overflowFlag = false;
     //decrease the element count
-    q->elementCount--;
+    q->elementCount -= 1;
   }else{
     //underflow error
     printf("Underflow error, empty queue\n\r");
@@ -116,10 +137,12 @@ void queue_overwritePush(queue_t* q, queue_data_t value){
 //print meaningful
 queue_data_t queue_readElementAt(queue_t* q, queue_index_t index){
   //check the indexIN
-  if (index >= q->element_count){
+
+  if (index >= q->elementCount){
     printf("Error\n\r");
   }
-  return q->data[q->indexOut + index % size);
+
+  return q->data[(q->indexOut + index) % queue_size(q)];
 }
 
 //get the element count
@@ -475,7 +498,7 @@ bool queue_runTest() {
     printf("=== Commencing basic fill test (calling queue_push() until full) of queue of size: %ld. === \n\r", arraySize);
     // Allocate the array.
     double* dataArray = (queue_data_t *) malloc(sizeof(queue_data_t) * arraySize);
-    for (uint i=0; i<arraySize; i++) {
+    for (uint32_t i=0; i<arraySize; i++) {
       dataArray[i] = (double) rand();
     }
     queue_t testQ;  // queue instance used for testing.
