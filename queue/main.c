@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "queue.h"
+#include <stdlib.h>
 #define SIZE_QUEUE 5
 
 
@@ -18,7 +19,6 @@ int main(){
   for(i = 0; i < 7; i++){
     queue_push(q, i);
   }
-  printQ(q);
   for(i = 20; i < 26; i++){
     queue_overwritePush(q, i);
     printf("----\n\r");

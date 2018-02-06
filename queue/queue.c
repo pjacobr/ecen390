@@ -4,6 +4,8 @@
 #include "queue.h"
 #include <assert.h>
 
+#define QUEUE_SIZE 10
+
 // Uncomment line below to print out informational messages during queue operation.
 // #define QUEUE_PRINT_INFO_MESSAGES
 
@@ -63,7 +65,7 @@ bool queue_empty(queue_t* q){
 }
 
 void printQueue(queue_t* q){
-  int i = 0;
+  queue_data_t i = 0;
   printf("[");
   for(i = 0; i < queue_elementCount(q); i++){
     printf("%f ", queue_readElementAt(q, i));
@@ -71,14 +73,14 @@ void printQueue(queue_t* q){
   printf("]\n\r");
 }
 
-void printQ(queue_t* q){
-  int i = 0;
-  printf("[");
-  for(i = 0; i < 6; i++){
-    printf("%f ", q->data[i]);
-  }
-  printf("]\n\r");
-}
+// void printQ(queue_t* q){
+//   queue_data_t i = 0;
+//   printf("[");
+//   for(i = 0; i < QUEUE_SIZE; i++){
+//     printf("%f ", q->data[i]);
+//   }
+//   printf("]\n\r");
+// }
 
 
 //if the queue if not full, push a new element into the queue and clear the underflow flag
@@ -120,6 +122,7 @@ queue_data_t queue_pop(queue_t* q){
   //check if queue is empty
   q->overflowFlag = false;
   if(!queue_empty(q)){
+    //get the element that should be returned, or the element that will be popped off
     queue_data_t return_element = q->data[q->indexOut];
     //increment the indexOut
     q->indexOut += 1;
@@ -157,7 +160,7 @@ queue_data_t queue_readElementAt(queue_t* q, queue_index_t index){
   if (index >= q->elementCount){
     printf("Error\n\r");
   }
-
+  // the index added to the started point and wrapped around to the beginning
   return q->data[(q->indexOut + index) % (queue_size(q) + 1)];
 }
 
