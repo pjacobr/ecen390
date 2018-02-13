@@ -18,10 +18,12 @@
 
 
 static double currentPowerValue[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-double oldest_value = 0;
-double newest_value = 0;
-double sum = 0;
-double prev_power = 0;
+static double power_array[] = {0,0,0,0,0,0,0,0,0,0}; //used to hold power of each player
+double oldest_value = 0; //used in computing the power of a player
+double newest_value = 0; //also used in computing the power of a player
+double sum = 0; //used to hold the power of a player
+double prev_power = 0; //used to simplify calculation of ongoing power values
+
 // These are the tick counts that are used to generate the user frequencies.
 // Not used in filter.h but are used to TEST the filter code.
 // Placed here for general access as they are essentially constant throughout
@@ -131,26 +133,27 @@ double filter_iirFilter(uint16_t filterNumber){
 // of the 10 output queues.
 double filter_computePower(uint16_t filterNumber, bool forceComputeFromScratch, bool debugPrint){
   sum = 0;
-  prev_power = 0;
+  //prev_power = 0; //not sure if this is needed or not
 if(forceComputeFromScratch){
   for (int i = 0; i < queue_size(&oQ[filterNumber]); i++){
     sum +=  queue_readElementAt(oQ[filterNumber],i)*queue_readElementAt(oQ[filterNumber],i);
   }
   currentPowerValue[filterNumber] = sum;
+  return sum;
 }
 else{
   prev_power = currentPowerValue[filterNumber];
-  oldest_value = queue_readElementAt(&oQ[filterNumber],0);
-  newest_value = queue_readElementAt(&oQ[filterNumber],queue_size(&oQ[filterNumber]));
-  new_power = prev_power - (oldest_value * oldest_value) + (newest_value * newest_value);
-  //********************This is incomplete********************************************
+  oldest_value = queue_readElementAt(&oQ[filterNumber],0); //stores the oldest signal
+  newest_value = queue_readElementAt(&oQ[filterNumber],queue_size(&oQ[filterNumber])); //stores the newest value
+  new_power = prev_power - (oldest_value * oldest_value) + (newest_value * newest_value); //efficient way to compute power after the first calculation, simply remove the oldest power and add in the most recent power!
+  currentPowerValue[filterNumber] = new_power; //This should resolve the "Note" given
+  return new_power;
 }
 }
 
 // Returns the last-computed output power value for the IIR filter [filterNumber].
 double filter_getCurrentPowerValue(uint16_t filterNumber){
-  return currentPowerValue[filterNumber];
-
+  return filter_computePower(filterNumber, false, false); //NOT SURE ON THESE FALSE STATEMENTS
 }
 
 // Get a copy of the current power values.
@@ -159,14 +162,18 @@ double filter_getCurrentPowerValue(uint16_t filterNumber){
 // Remember that when you pass an array into a C function, changes to the array within
 // that function are reflected in the returned array.
 void filter_getCurrentPowerValues(double powerValues[]){
-
+  for(int i = 0; i < FILTER_IIR_FILTER_COUNT; i++){
+    powerValues[i] = filter_getCurrentPowerValue(i); //fill the array with the power at each filter
+  }
 }
 
 // Using the previously-computed power values that are current stored in currentPowerValue[] array,
 // Copy these values into the normalizedArray[] argument and then normalize them by dividing
 // all of the values in normalizedArray by the maximum power value contained in currentPowerValue[].
 void filter_getNormalizedPowerValues(double normalizedArray[], uint16_t* indexOfMaxValue){
-
+  for(int i = 0; i < FILTER_IIR_FILTER_COUNT; i++){
+    normalizedArray[i] = filter_getCurrentPowerValue(i)/filter_getCurrentPowerValue(indexOfMaxValue); //fill the array with the normalized powers
+  }
 }
 
 /*********************************************************************************************************
@@ -207,7 +214,7 @@ uint32_t filter_getIirBCoefficientCount(){
 
 // Returns the size of the yQueue.
 uint32_t filter_getYQueueSize(){
-
+  return queue_size(&yQ);
 }
 
 // Returns the decimation value.
@@ -217,22 +224,22 @@ uint16_t filter_getDecimationValue(){
 
 // Returns the address of xQueue.
 queue_t* filter_getXQueue(){
-
+  return &xQ;
 }
 
 // Returns the address of yQueue.
 queue_t* filter_getYQueue(){
-
+  return &yQ;
 }
 
 // Returns the address of zQueue for a specific filter number.
 queue_t* filter_getZQueue(uint16_t filterNumber){
-
+  return &(zQ[filterNumber]);
 }
 
 // Returns the address of the IIR output-queue for a specific filter-number.
 queue_t* filter_getIirOutputQueue(uint16_t filterNumber){
-
+  return &(oQ[filterNumber]);
 }
 
 //void filter_runTest();
