@@ -249,19 +249,22 @@ double filter_firFilter(){
 double filter_iirFilter(uint16_t filterNumber){
   //output of the fir filter convolution
   double y;
+  double yy;
   // each time this is calculated, initialize it to 0
   y = 0.0;
   // This for-loop performs the identical computation to that shown above. for-loop is correct way to do it.
-  for (uint32_t i=0; i< ZQ_SIZE; i++) {
-    for(uint32_t k = 0; i < YQ_SIZE; k++){
-    y += queue_readElementAt(&yQ, IIR_B_COEFFICIENT_COUNT-1-i) * iirBCoefficientConstants[i,k] -
-    queue_readElementAt(&zQ, IIR_A_COEFFICIENT_COUNT-1-i) * iirACoefficientConstants[i,k]  // iteratively adds the (b * input) products.
-    }
+  for(uint32_t k = 0; i < YQ_SIZE; k++){
+  y += queue_readElementAt(&yQ, IIR_B_COEFFICIENT_COUNT-1-i) * iirBCoefficientConstants[i,filterNumber]; // iteratively adds the (b * input) products.
   }
+
+  for (uint32_t i=0; i< ZQ_SIZE; i++) {
+    yy += queue_readElementAt(&zQ, IIR_A_COEFFICIENT_COUNT-1-i) * iirACoefficientConstants[i,filterNumber]; // iteratively adds the (b * input) products.
+  }
+double result = y-yy;
   //push the new y value onto the zQueue of the filter we are on
-  queue_overwritePush(&(zQ[filterNumber]), y);
+  queue_overwritePush(&(zQ[filterNumber]), result);
   //return the output as well as pushing it onto the zQueue
-  return y;
+  return result;
 }
 
 // Use this to compute the power for values contained in an outputQueue.
